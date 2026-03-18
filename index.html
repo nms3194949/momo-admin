@@ -510,6 +510,16 @@ async function filterPolicies(client) {
 
 function renderPolicies(rows) {
   const tbody = document.getElementById('policiesTbody');
+
+  // 先按保單分群，計算每張保單的加總
+  const policyMap = {};
+  rows.forEach(r => {
+    const key = r.client + '||' + r.policy;
+    if (!policyMap[key]) policyMap[key] = { client: r.client, policy: r.policy, totalCost: 0, totalValue: 0 };
+    policyMap[key].totalCost  += parseFloat(r.cost)  || 0;
+    policyMap[key].totalValue += parseFloat(r.value) || 0;
+  });
+
   let lastPolicy = '';
   tbody.innerHTML = rows.map(r => {
     const isNewPolicy = r.policy !== lastPolicy;
@@ -518,12 +528,33 @@ function renderPolicies(rows) {
     const value = parseFloat(r.value) || 0;
     const pct   = cost > 0 ? ((value - cost) / cost * 100).toFixed(1) : '0.0';
     const cls   = profitClass(cost, value);
-    const rJson = encodeURIComponent(JSON.stringify({client:r.client, policy:r.policy}));
+
+    // 保單加總
+    const key        = r.client + '||' + r.policy;
+    const summary    = policyMap[key];
+    const totCost    = summary.totalCost;
+    const totValue   = summary.totalValue;
+    const totProfit  = totValue - totCost;
+    const totPct     = totCost > 0 ? ((totProfit / totCost) * 100).toFixed(2) : '0.00';
+    const totCls     = totProfit > 0 ? 'value-pos' : totProfit < 0 ? 'value-neg' : 'value-neu';
+    const totIcon    = totProfit > 0 ? '▲' : totProfit < 0 ? '▼' : '–';
+
     return `
-      ${isNewPolicy ? `<tr class="policy-group"><td colspan="10" class="policy-label">
-        📋 ${esc(r.client)} — ${esc(r.policy)}
-        <button class="btn btn-sec btn-sm" style="margin-left:8px;float:right" onclick="showAddFund('${esc(r.client)}','${esc(r.policy)}')">＋ 新增基金</button>
-      </td></tr>` : ''}
+      ${isNewPolicy ? `
+      <tr class="policy-group">
+        <td colspan="10">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+            <span class="policy-label">📋 ${esc(r.client)} — ${esc(r.policy)}</span>
+            <div style="display:flex;gap:12px;align-items:center;font-size:11px">
+              <span style="color:#94A3B8">持有成本 <strong style="color:#E2E8F0">NT$ ${fmtNum(totCost)}</strong></span>
+              <span style="color:#94A3B8">目前市值 <strong style="color:#E2E8F0">NT$ ${fmtNum(totValue)}</strong></span>
+              <span style="color:#94A3B8">損益 <strong class="${totCls}">${totIcon} NT$ ${fmtNum(totProfit)}</strong></span>
+              <span class="${totCls}" style="font-weight:bold;font-size:13px">${totPct}%</span>
+              <button class="btn btn-sec btn-sm" onclick="showAddFund('${esc(r.client)}','${esc(r.policy)}')">＋ 新增</button>
+            </div>
+          </div>
+        </td>
+      </tr>` : ''}
       <tr>
         <td>${esc(r.client)}</td>
         <td>${esc(r.policy)}</td>
