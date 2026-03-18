@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MOMO 管理後台</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0F172A; color: #E2E8F0; font-family: Arial, sans-serif; min-height: 100vh; }
+
+/* ── 頂部 ── */
+.topbar { background: #1E293B; border-bottom: 1px solid #334155; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+.topbar-title { color: #F59E0B; font-weight: bold; font-size: 16px; }
+.topbar-status { font-size: 11px; color: #64748B; }
+
+/* ── Tab 導覽 ── */
+.tabs { display: flex; background: #1E293B; border-bottom: 1px solid #334155; }
+.tab { flex: 1; padding: 10px 4px; text-align: center; font-size: 12px; color: #64748B; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.tab.active { color: #F59E0B; border-bottom-color: #F59E0B; }
+.tab:hover { color: #E2E8F0; }
+
+/* ── 內容區 ── */
+.panel { display: none; padding: 12px; }
+.panel.active { display: block; }
+
+/* ── 卡片 ── */
+.card { background: #1E293B; border: 1px solid #334155; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+
+/* ── 輸入 ── */
+.inp { width: 100%; background: #0F172A; border: 1px solid #334155; color: #E2E8F0; padding: 8px 10px; border-radius: 7px; font-size: 13px; margin-bottom: 8px; }
+.inp:focus { outline: none; border-color: #F59E0B; }
+textarea.inp { resize: vertical; min-height: 80px; }
+.lbl { font-size: 11px; color: #94A3B8; margin-bottom: 4px; display: block; }
+
+/* ── 按鈕 ── */
+.btn { background: linear-gradient(90deg,#F59E0B,#D97706); color: #000; font-weight: bold; border: none; border-radius: 7px; padding: 8px 16px; cursor: pointer; font-size: 13px; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-sec { background: #334155; color: #E2E8F0; border: 1px solid #475569; }
+.btn-danger { background: #DC2626; color: #fff; border: none; }
+.btn-sm { padding: 4px 10px; font-size: 11px; border-radius: 5px; }
+.btn-full { width: 100%; }
+
+/* ── 搜尋列 ── */
+.row { display: flex; gap: 8px; align-items: center; }
+.row .inp { margin: 0; flex: 1; }
+
+/* ── 結果列表 ── */
+.result-item { padding: 8px 10px; background: #0F172A; border: 1px solid #334155; border-radius: 7px; cursor: pointer; margin-top: 6px; }
+.result-item:hover { border-color: #F59E0B; }
+.result-name { display: flex; justify-content: space-between; font-size: 13px; }
+.result-uid { font-size: 10px; color: #475569; font-family: monospace; margin-top: 2px; }
+.result-tags { font-size: 11px; color: #60A5FA; margin-top: 2px; }
+.badge-active { color: #34D399; font-size: 11px; }
+.badge-other  { color: #64748B; font-size: 11px; }
+
+/* ── 會員詳情 ── */
+.detail-hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.detail-name { color: #F59E0B; font-size: 16px; font-weight: bold; }
+.detail-uid  { font-size: 10px; color: #475569; font-family: monospace; }
+.close-btn   { background: none; border: none; color: #64748B; font-size: 18px; cursor: pointer; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.coupon-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #1E293B; font-size: 12px; }
+.coupon-exp { color: #64748B; font-size: 11px; }
+
+/* ── 保單表格 ── */
+.table-wrap { overflow-x: auto; margin-top: 8px; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 600px; }
+th { background: #0F172A; color: #F59E0B; padding: 8px 6px; text-align: left; font-size: 11px; white-space: nowrap; border-bottom: 1px solid #334155; }
+td { padding: 7px 6px; border-bottom: 1px solid #1E293B; vertical-align: middle; }
+tr:hover td { background: #1E293B55; }
+.editable { cursor: pointer; border-bottom: 1px dashed #475569; }
+.editable:hover { color: #F59E0B; }
+.policy-group { background: #0F172A44; }
+.policy-label { color: #F59E0B; font-size: 11px; font-weight: bold; }
+.value-pos { color: #FF4D4F; }
+.value-neg { color: #52C41A; }
+.value-neu { color: #94A3B8; }
+
+/* ── Filter ── */
+.filter-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.filter-btn { padding: 4px 10px; font-size: 11px; border-radius: 5px; cursor: pointer; border: 1px solid #334155; background: #1E293B; color: #94A3B8; }
+.filter-btn.active { border-color: #F59E0B; color: #F59E0B; background: #1E293B; }
+
+/* ── Toast ── */
+.toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); padding: 8px 20px; border-radius: 8px; font-size: 13px; color: #fff; display: none; z-index: 999; white-space: nowrap; box-shadow: 0 4px 16px rgba(0,0,0,0.5); }
+.toast-ok  { background: #16A34A; }
+.toast-err { background: #DC2626; }
+
+/* ── Spinner ── */
+.spin { border: 2px solid #334155; border-top-color: #F59E0B; border-radius: 50%; width: 16px; height: 16px; animation: sp 0.8s linear infinite; display: inline-block; vertical-align: middle; }
+@keyframes sp { to { transform: rotate(360deg); } }
+.hint { font-size: 11px; color: #475569; margin-top: 4px; }
+.hidden { display: none !important; }
+.section-title { font-size: 12px; color: #94A3B8; margin-bottom: 8px; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<!-- 設定 GAS URL -->
+<script>
+  // ★ 請替換成你的 GAS Web App URL
+  const GAS_URL = 'YOUR_GAS_WEB_APP_URL_HERE';
+</script>
+
+<!-- 頂部 -->
+<div class="topbar">
+  <div class="topbar-title">⚙️ MOMO 管理後台</div>
+  <div class="topbar-status" id="statusText">就緒</div>
+</div>
+
+<!-- Tab 導覽 -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('members')">👥 會員</div>
+  <div class="tab" onclick="switchTab('policies')">📊 保單</div>
+  <div class="tab" onclick="switchTab('coupons')">🎫 優惠券</div>
+  <div class="tab" onclick="switchTab('broadcast')">📢 廣播</div>
+</div>
+
+<!-- ==================== 會員 Tab ==================== -->
+<div id="tab-members" class="panel active">
+
+  <!-- 搜尋 -->
+  <div class="card">
+    <div class="lbl">🔍 會員搜尋 (UID / 名稱)</div>
+    <div class="row">
+      <input id="q" class="inp" placeholder="輸入關鍵字..." onkeydown="if(event.key==='Enter')doSearch()">
+      <button class="btn" id="btnSearch" onclick="doSearch()">搜尋</button>
+    </div>
+    <div id="searchList"></div>
+  </div>
+
+  <!-- 會員詳情 -->
+  <div id="memberDetail" class="card hidden" style="border-left:3px solid #F59E0B">
+    <div class="detail-hdr">
+      <div>
+        <div class="detail-name" id="dName">-</div>
+        <div class="detail-uid"  id="dUid">-</div>
+      </div>
+      <button class="close-btn" onclick="closeDetail()">✕</button>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <label class="lbl">🏷️ 標籤</label>
+        <input id="dTags" class="inp" placeholder="逗號分隔">
+      </div>
+      <div>
+        <label class="lbl">🎂 生日 (YYYY/MM/DD)</label>
+        <input id="dBirth" class="inp" placeholder="1990/1/1">
+      </div>
+    </div>
+    <div class="grid2" style="margin-bottom:10px">
+      <button class="btn btn-sec" onclick="saveAttr('tags')">💾 儲存標籤</button>
+      <button class="btn btn-sec" onclick="saveAttr('birthday')">💾 儲存生日</button>
+    </div>
+    <div class="grid2" style="margin-bottom:10px">
+      <button class="btn btn-sec" onclick="grantCoupon()">🎁 補發券</button>
+      <button class="btn btn-danger" onclick="redeemCoupon()">✅ 核銷券</button>
+    </div>
+
+    <div class="lbl">持有票券 (Active)</div>
+    <div id="dCoupons"><span class="hint">載入中...</span></div>
+  </div>
+</div>
+
+<!-- ==================== 保單 Tab ==================== -->
+<div id="tab-policies" class="panel">
+  <div class="card">
+    <div class="section-title">篩選客戶</div>
+    <div class="filter-row" id="clientFilters">
+      <button class="filter-btn active" onclick="filterPolicies('')" data-client="">全部</button>
+      <button class="filter-btn" onclick="filterPolicies('MOMO')" data-client="MOMO">MOMO</button>
+      <button class="filter-btn" onclick="filterPolicies('亞婷')" data-client="亞婷">亞婷</button>
+      <button class="filter-btn" onclick="filterPolicies('宜真')" data-client="宜真">宜真</button>
+      <button class="filter-btn" onclick="filterPolicies('天天')" data-client="天天">天天</button>
+      <button class="filter-btn" onclick="filterPolicies('小語')" data-client="小語">小語</button>
+      <button class="filter-btn" onclick="filterPolicies('其他客戶')" data-client="其他客戶">其他</button>
+    </div>
+    <div id="policiesLoading" class="hint">點擊篩選客戶以載入資料</div>
+    <div class="table-wrap">
+      <table id="policiesTable" class="hidden">
+        <thead>
+          <tr>
+            <th>客戶</th><th>保單</th><th>基金名稱</th>
+            <th>單位數</th><th>平均價格</th><th>平均匯率</th>
+            <th>持有成本</th><th>目前市值</th><th>日期</th>
+          </tr>
+        </thead>
+        <tbody id="policiesTbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 優惠券 Tab ==================== -->
+<div id="tab-coupons" class="panel">
+  <div class="card">
+    <div class="lbl">🔍 查詢會員優惠券 (UID)</div>
+    <div class="row">
+      <input id="cUid" class="inp" placeholder="輸入 UID...">
+      <button class="btn" onclick="loadCoupons()">查詢</button>
+    </div>
+    <div id="couponResult" style="margin-top:8px"></div>
+  </div>
+
+  <div class="card">
+    <div class="lbl">🎁 手動補發優惠券</div>
+    <input id="grantUid"  class="inp" placeholder="UID">
+    <input id="grantName" class="inp" placeholder="券名稱">
+    <button class="btn btn-full" onclick="doGrant()">補發</button>
+  </div>
+
+  <div class="card">
+    <div class="lbl">✅ 手動核銷優惠券</div>
+    <input id="redeemUid"  class="inp" placeholder="UID">
+    <input id="redeemName" class="inp" placeholder="券名稱">
+    <button class="btn btn-danger btn-full" onclick="doRedeem()">核銷</button>
+  </div>
+</div>
+
+<!-- ==================== 廣播 Tab ==================== -->
+<div id="tab-broadcast" class="panel">
+  <div class="card">
+    <div class="lbl">📢 分眾廣播 Push</div>
+    <input id="bcTag" class="inp" placeholder="標籤關鍵字（留空 = 全員 Active 會員）">
+    <textarea id="bcMsg" class="inp" placeholder="輸入訊息內容..."></textarea>
+    <button class="btn btn-full" id="btnBroadcast" onclick="doBroadcast()">🚀 發送推播</button>
+    <div class="hint">* 依 Tags 欄位篩選，留空發送全員</div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<script>
+// ==========================================
+// 工具函式
+// ==========================================
+let curUid = '', curUser = {};
+
+async function api(params) {
+  setStatus('載入中...');
+  try {
+    const url = GAS_URL + '?' + new URLSearchParams(params).toString();
+    const res  = await fetch(url);
+    const data = await res.json();
+    setStatus('就緒');
+    return data;
+  } catch (e) {
+    setStatus('連線失敗');
+    showToast('連線失敗: ' + e.message, 'err');
+    return null;
+  }
+}
+
+function setStatus(t) { document.getElementById('statusText').textContent = t; }
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (type === 'err' ? 'toast-err' : 'toast-ok');
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 3000);
+}
+
+function esc(s) {
+  return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
+}
+
+function fmtNum(n) {
+  const v = parseFloat(n) || 0;
+  return v.toLocaleString('zh-TW', { maximumFractionDigits: 0 });
+}
+
+function profitClass(cost, val) {
+  const diff = val - cost;
+  return diff > 0 ? 'value-pos' : diff < 0 ? 'value-neg' : 'value-neu';
+}
+
+// ==========================================
+// Tab 切換
+// ==========================================
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const names = ['members','policies','coupons','broadcast'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+// ==========================================
+// 會員搜尋
+// ==========================================
+async function doSearch() {
+  const q = document.getElementById('q').value.trim();
+  if (!q) return showToast('請輸入關鍵字', 'err');
+
+  const btn = document.getElementById('btnSearch');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>';
+
+  const data = await api({ api: 'searchUsers', q });
+  btn.disabled = false;
+  btn.textContent = '搜尋';
+
+  const box = document.getElementById('searchList');
+  if (!data || !data.length) {
+    box.innerHTML = '<div class="hint" style="padding:8px 0">查無結果</div>';
+    return;
+  }
+
+  box.innerHTML = data.map(u => `
+    <div class="result-item" onclick="loadMember(${JSON.stringify(u).replace(/"/g,'&quot;')})">
+      <div class="result-name">
+        <span>${esc(u.name)}</span>
+        <span class="${u.status==='Active'?'badge-active':'badge-other'}">${u.status}</span>
+      </div>
+      <div class="result-uid">${u.uid}</div>
+      ${u.tags ? `<div class="result-tags">🏷️ ${esc(u.tags)}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function loadMember(u) {
+  curUid = u.uid; curUser = u;
+  document.getElementById('dName').textContent  = u.name;
+  document.getElementById('dUid').textContent   = u.uid;
+  document.getElementById('dTags').value        = u.tags || '';
+  document.getElementById('dBirth').value       = u.birthday || '';
+  document.getElementById('searchList').innerHTML = '';
+  document.getElementById('memberDetail').classList.remove('hidden');
+  loadMemberCoupons(u.uid);
+}
+
+function closeDetail() {
+  document.getElementById('memberDetail').classList.add('hidden');
+  curUid = ''; curUser = {};
+}
+
+async function loadMemberCoupons(uid) {
+  document.getElementById('dCoupons').innerHTML = '<span class="spin"></span>';
+  const data = await api({ api: 'listCoupons', uid });
+  if (!data || !data.coupons || !data.coupons.length) {
+    document.getElementById('dCoupons').innerHTML = '<div class="hint">目前無 Active 票券</div>';
+    return;
+  }
+  document.getElementById('dCoupons').innerHTML = data.coupons.map(c => `
+    <div class="coupon-row">
+      <span>${esc(c.name)}</span>
+      <span class="coupon-exp">${c.expire}</span>
+    </div>
+  `).join('');
+}
+
+async function saveAttr(field) {
+  if (!curUid) return;
+  const val = document.getElementById(field === 'tags' ? 'dTags' : 'dBirth').value.trim();
+  const res = await api({ api: 'updateUserAttr', uid: curUid, field, value: val });
+  showToast(res && res.ok ? '✅ 已儲存' : '❌ 儲存失敗', res && res.ok ? 'ok' : 'err');
+}
+
+async function grantCoupon() {
+  if (!curUid) return;
+  const name = prompt('請輸入券名稱：');
+  if (!name) return;
+  const res = await api({ api: 'grantCoupon', uid: curUid, name });
+  showToast(res && res.ok ? '✅ 已補發：' + name : '❌ 補發失敗');
+  if (res && res.ok) loadMemberCoupons(curUid);
+}
+
+async function redeemCoupon() {
+  if (!curUid) return;
+  const name = prompt('請輸入要核銷的券名稱：');
+  if (!name) return;
+  if (!confirm('確定核銷「' + name + '」給 ' + curUser.name + '？')) return;
+  const res = await api({ api: 'redeemCoupon', uid: curUid, name });
+  showToast(res && res.ok ? '✅ ' + res.msg : '❌ ' + (res && res.msg), res && res.ok ? 'ok' : 'err');
+  if (res && res.ok) loadMemberCoupons(curUid);
+}
+
+// ==========================================
+// 保單管理
+// ==========================================
+let allPolicies = [];
+
+async function filterPolicies(client) {
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.client === client);
+  });
+
+  document.getElementById('policiesLoading').textContent = '載入中...';
+  document.getElementById('policiesTable').classList.add('hidden');
+
+  const data = await api({ api: 'getPolicies', client });
+  if (!data || !data.ok) {
+    document.getElementById('policiesLoading').textContent = '載入失敗';
+    return;
+  }
+
+  allPolicies = data.rows;
+  renderPolicies(data.rows);
+  document.getElementById('policiesLoading').textContent = '';
+  document.getElementById('policiesTable').classList.remove('hidden');
+}
+
+function renderPolicies(rows) {
+  const tbody = document.getElementById('policiesTbody');
+  let lastPolicy = '';
+  tbody.innerHTML = rows.map(r => {
+    const isNewPolicy = r.policy !== lastPolicy;
+    lastPolicy = r.policy;
+    const cost  = parseFloat(r.cost)  || 0;
+    const value = parseFloat(r.value) || 0;
+    const pct   = cost > 0 ? ((value - cost) / cost * 100).toFixed(1) : '0.0';
+    const cls   = profitClass(cost, value);
+    return `
+      ${isNewPolicy ? `<tr class="policy-group"><td colspan="9" class="policy-label">📋 ${esc(r.client)} — ${esc(r.policy)}</td></tr>` : ''}
+      <tr>
+        <td>${esc(r.client)}</td>
+        <td>${esc(r.policy)}</td>
+        <td>${esc(r.fund)}</td>
+        <td class="editable" onclick="editCell(${r.row},'units',this)" title="點擊編輯">${r.units}</td>
+        <td class="editable" onclick="editCell(${r.row},'price',this)" title="點擊編輯">${r.price}</td>
+        <td class="editable" onclick="editCell(${r.row},'rate',this)"  title="點擊編輯">${r.rate}</td>
+        <td>NT$ ${fmtNum(cost)}</td>
+        <td class="${cls}">NT$ ${fmtNum(value)}<br><span style="font-size:10px">${pct}%</span></td>
+        <td>${r.date}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function editCell(row, field, td) {
+  const oldVal = td.textContent.trim();
+  const newVal = prompt('修改 ' + field + '（目前：' + oldVal + '）：', oldVal);
+  if (newVal === null || newVal === oldVal) return;
+  const res = await api({ api: 'updatePolicy', row, field, value: newVal });
+  if (res && res.ok) {
+    td.textContent = newVal;
+    showToast('✅ 已更新');
+  } else {
+    showToast('❌ ' + (res && res.msg || '更新失敗'), 'err');
+  }
+}
+
+// ==========================================
+// 優惠券 Tab
+// ==========================================
+async function loadCoupons() {
+  const uid = document.getElementById('cUid').value.trim();
+  if (!uid) return showToast('請輸入 UID', 'err');
+  const data = await api({ api: 'listCoupons', uid });
+  const box  = document.getElementById('couponResult');
+  if (!data || !data.coupons || !data.coupons.length) {
+    box.innerHTML = '<div class="hint">目前無 Active 票券</div>';
+    return;
+  }
+  box.innerHTML = data.coupons.map(c => `
+    <div class="coupon-row">
+      <span>${esc(c.name)}</span>
+      <span class="coupon-exp">${c.expire}</span>
+    </div>
+  `).join('');
+}
+
+async function doGrant() {
+  const uid  = document.getElementById('grantUid').value.trim();
+  const name = document.getElementById('grantName').value.trim();
+  if (!uid || !name) return showToast('請填寫 UID 和券名稱', 'err');
+  const res = await api({ api: 'grantCoupon', uid, name });
+  showToast(res && res.ok ? '✅ 已補發：' + name : '❌ 補發失敗', res && res.ok ? 'ok' : 'err');
+}
+
+async function doRedeem() {
+  const uid  = document.getElementById('redeemUid').value.trim();
+  const name = document.getElementById('redeemName').value.trim();
+  if (!uid || !name) return showToast('請填寫 UID 和券名稱', 'err');
+  if (!confirm('確定核銷「' + name + '」？')) return;
+  const res = await api({ api: 'redeemCoupon', uid, name });
+  showToast(res && res.ok ? '✅ ' + res.msg : '❌ ' + (res && res.msg), res && res.ok ? 'ok' : 'err');
+}
+
+// ==========================================
+// 廣播
+// ==========================================
+async function doBroadcast() {
+  const tag = document.getElementById('bcTag').value.trim();
+  const msg = document.getElementById('bcMsg').value.trim();
+  if (!msg) return showToast('請輸入訊息內容', 'err');
+
+  const target = tag ? '標籤「' + tag + '」的會員' : '所有 Active 會員';
+  if (!confirm('確定發送給' + target + '？')) return;
+
+  const btn = document.getElementById('btnBroadcast');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> 發送中...';
+
+  const res = await api({ api: 'broadcast', tag, msg });
+  btn.disabled = false;
+  btn.textContent = '🚀 發送推播';
+
+  if (res !== null) {
+    showToast('✅ 發送完成：' + (res.count || 0) + ' 人');
+    document.getElementById('bcMsg').value = '';
+    document.getElementById('bcTag').value = '';
+  }
+}
+</script>
+</body>
+</html>
