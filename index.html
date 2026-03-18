@@ -293,26 +293,40 @@ tr:hover td { background: #1E293B55; }
 
 <script>
 // ==========================================
-// 登入邏輯
+// 登入邏輯（帳密由 GAS Script Properties 驗證）
 // ==========================================
 
-// ★ 在這裡設定你的帳號密碼
-const AUTH = {
-  username: 'momo',
-  password: 'momo168'
-};
-
-function doLogin() {
+async function doLogin() {
   const user = document.getElementById('loginUser').value.trim();
   const pass = document.getElementById('loginPass').value;
-  if (user === AUTH.username && pass === AUTH.password) {
-    document.getElementById('loginPage').style.display = 'none';
-    document.getElementById('mainPage').style.display  = 'block';
-    sessionStorage.setItem('momo_auth', '1');
-  } else {
+  if (!user || !pass) return;
+
+  const btn = document.querySelector('#loginPage .btn');
+  btn.disabled = true;
+  btn.textContent = '驗證中...';
+  document.getElementById('loginErr').style.display = 'none';
+
+  try {
+    const url = GAS_URL + '?' + new URLSearchParams({ api: 'login', user, pass }).toString();
+    const res  = await fetch(url);
+    const data = await res.json();
+
+    if (data && data.ok) {
+      sessionStorage.setItem('momo_auth', '1');
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('mainPage').style.display  = 'block';
+    } else {
+      document.getElementById('loginErr').textContent    = data.msg || '帳號或密碼錯誤';
+      document.getElementById('loginErr').style.display = 'block';
+      document.getElementById('loginPass').value = '';
+    }
+  } catch (e) {
+    document.getElementById('loginErr').textContent    = '連線失敗，請稍後再試';
     document.getElementById('loginErr').style.display = 'block';
-    document.getElementById('loginPass').value = '';
   }
+
+  btn.disabled = false;
+  btn.textContent = '登入';
 }
 
 // 檢查是否已登入（同一瀏覽器 session 內不用重複登入）
