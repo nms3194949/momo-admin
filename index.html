@@ -183,11 +183,46 @@ tr:hover td { background: #1E293B55; }
           <tr>
             <th>客戶</th><th>保單</th><th>基金名稱</th>
             <th>單位數</th><th>平均價格</th><th>平均匯率</th>
-            <th>持有成本</th><th>目前市值</th><th>日期</th>
+            <th>持有成本</th><th>目前市值</th><th>日期</th><th></th>
           </tr>
         </thead>
         <tbody id="policiesTbody"></tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- 新增基金表單 -->
+  <div class="card" id="addFundCard" style="display:none">
+    <div class="section-title">➕ 新增基金</div>
+    <div class="grid2">
+      <div>
+        <label class="lbl">客戶名稱</label>
+        <input id="addClient" class="inp" placeholder="例：亞婷" readonly>
+      </div>
+      <div>
+        <label class="lbl">保單名稱</label>
+        <input id="addPolicy" class="inp" placeholder="例：亞婷安達" readonly>
+      </div>
+    </div>
+    <label class="lbl">基金名稱</label>
+    <select id="addFund" class="inp" style="cursor:pointer">
+      <option value="">-- 載入中 --</option>
+    </select>
+    <div class="grid2">
+      <div>
+        <label class="lbl">單位數</label>
+        <input id="addUnits" class="inp" type="number" placeholder="0.000000">
+      </div>
+      <div>
+        <label class="lbl">平均價格</label>
+        <input id="addPrice" class="inp" type="number" placeholder="0.0000">
+      </div>
+    </div>
+    <label class="lbl">平均匯率</label>
+    <input id="addRate" class="inp" type="number" placeholder="1（台幣基金填 1）">
+    <div class="grid2">
+      <button class="btn btn-sec" onclick="document.getElementById('addFundCard').style.display='none'">取消</button>
+      <button class="btn" onclick="doAddFund()">✅ 確認新增</button>
     </div>
   </div>
 </div>
@@ -414,8 +449,12 @@ function renderPolicies(rows) {
     const value = parseFloat(r.value) || 0;
     const pct   = cost > 0 ? ((value - cost) / cost * 100).toFixed(1) : '0.0';
     const cls   = profitClass(cost, value);
+    const rJson = encodeURIComponent(JSON.stringify({client:r.client, policy:r.policy}));
     return `
-      ${isNewPolicy ? `<tr class="policy-group"><td colspan="9" class="policy-label">📋 ${esc(r.client)} — ${esc(r.policy)}</td></tr>` : ''}
+      ${isNewPolicy ? `<tr class="policy-group"><td colspan="10" class="policy-label">
+        📋 ${esc(r.client)} — ${esc(r.policy)}
+        <button class="btn btn-sec btn-sm" style="margin-left:8px;float:right" onclick="showAddFund('${esc(r.client)}','${esc(r.policy)}')">＋ 新增基金</button>
+      </td></tr>` : ''}
       <tr>
         <td>${esc(r.client)}</td>
         <td>${esc(r.policy)}</td>
@@ -426,9 +465,71 @@ function renderPolicies(rows) {
         <td>NT$ ${fmtNum(cost)}</td>
         <td class="${cls}">NT$ ${fmtNum(value)}<br><span style="font-size:10px">${pct}%</span></td>
         <td>${r.date}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="deleteFund(${r.row},'${esc(r.fund)}')">🗑</button></td>
       </tr>
     `;
   }).join('');
+}
+
+// 新增基金
+let fundList = [];
+async function showAddFund(client, policy) {
+  document.getElementById('addClient').value = client;
+  document.getElementById('addPolicy').value = policy;
+  document.getElementById('addUnits').value  = '';
+  document.getElementById('addPrice').value  = '';
+  document.getElementById('addRate').value   = '';
+  document.getElementById('addFundCard').style.display = 'block';
+  document.getElementById('addFundCard').scrollIntoView({ behavior: 'smooth' });
+
+  // 載入基金清單
+  if (fundList.length === 0) {
+    const sel = document.getElementById('addFund');
+    sel.innerHTML = '<option>載入中...</option>';
+    const data = await api({ api: 'getFundList' });
+    if (data && data.funds) {
+      fundList = data.funds;
+      sel.innerHTML = '<option value="">-- 請選擇基金 --</option>' +
+        data.funds.map(f => `<option value="${esc(f)}">${esc(f)}</option>`).join('');
+    }
+  }
+}
+
+async function doAddFund() {
+  const client = document.getElementById('addClient').value;
+  const policy = document.getElementById('addPolicy').value;
+  const fund   = document.getElementById('addFund').value;
+  const units  = document.getElementById('addUnits').value;
+  const price  = document.getElementById('addPrice').value;
+  const rate   = document.getElementById('addRate').value;
+
+  if (!fund)  return showToast('請選擇基金', 'err');
+  if (!units) return showToast('請輸入單位數', 'err');
+  if (!price) return showToast('請輸入平均價格', 'err');
+  if (!rate)  return showToast('請輸入平均匯率', 'err');
+
+  const res = await api({ api: 'addPolicyRow', client, policy, fund, units, price, rate });
+  if (res && res.ok) {
+    showToast('✅ ' + res.msg);
+    document.getElementById('addFundCard').style.display = 'none';
+    // 重新載入表格
+    const activeClient = document.querySelector('.filter-btn.active').dataset.client;
+    filterPolicies(activeClient);
+  } else {
+    showToast('❌ ' + (res && res.msg || '新增失敗'), 'err');
+  }
+}
+
+async function deleteFund(row, fundName) {
+  if (!confirm('確定刪除「' + fundName + '」？\n此操作無法復原！')) return;
+  const res = await api({ api: 'deletePolicyRow', row });
+  if (res && res.ok) {
+    showToast('✅ 已刪除');
+    const activeClient = document.querySelector('.filter-btn.active').dataset.client;
+    filterPolicies(activeClient);
+  } else {
+    showToast('❌ ' + (res && res.msg || '刪除失敗'), 'err');
+  }
 }
 
 async function editCell(row, field, td) {
