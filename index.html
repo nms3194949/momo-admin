@@ -86,6 +86,13 @@ tr:hover td { background: #1E293B55; }
 .toast-ok  { background: #16A34A; }
 .toast-err { background: #DC2626; }
 
+/* ── 登入頁 ── */
+.login-wrap { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #0F172A; }
+.login-box { background: #1E293B; border: 1px solid #334155; border-radius: 14px; padding: 32px 28px; width: 320px; }
+.login-logo { text-align: center; color: #F59E0B; font-size: 22px; font-weight: bold; margin-bottom: 6px; }
+.login-sub  { text-align: center; color: #64748B; font-size: 12px; margin-bottom: 24px; }
+.login-err  { color: #F87171; font-size: 12px; text-align: center; margin-top: 8px; display: none; }
+
 /* ── Spinner ── */
 .spin { border: 2px solid #334155; border-top-color: #F59E0B; border-radius: 50%; width: 16px; height: 16px; animation: sp 0.8s linear infinite; display: inline-block; vertical-align: middle; }
 @keyframes sp { to { transform: rotate(360deg); } }
@@ -95,6 +102,23 @@ tr:hover td { background: #1E293B55; }
 </style>
 </head>
 <body>
+
+<!-- 登入頁 -->
+<div id="loginPage" class="login-wrap">
+  <div class="login-box">
+    <div class="login-logo">⚙️ MOMO 管理後台</div>
+    <div class="login-sub">請輸入帳號密碼登入</div>
+    <label class="lbl">帳號</label>
+    <input id="loginUser" class="inp" type="text" placeholder="帳號" onkeydown="if(event.key==='Enter')doLogin()">
+    <label class="lbl">密碼</label>
+    <input id="loginPass" class="inp" type="password" placeholder="密碼" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn btn-full" style="margin-top:8px" onclick="doLogin()">登入</button>
+    <div class="login-err" id="loginErr">帳號或密碼錯誤</div>
+  </div>
+</div>
+
+<!-- 主頁面（登入後顯示）-->
+<div id="mainPage" style="display:none">
 
 <!-- 設定 GAS URL -->
 <script>
@@ -268,6 +292,37 @@ tr:hover td { background: #1E293B55; }
 <div id="toast" class="toast"></div>
 
 <script>
+// ==========================================
+// 登入邏輯
+// ==========================================
+
+// ★ 在這裡設定你的帳號密碼
+const AUTH = {
+  username: 'momo',
+  password: 'momo2024'
+};
+
+function doLogin() {
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  if (user === AUTH.username && pass === AUTH.password) {
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('mainPage').style.display  = 'block';
+    sessionStorage.setItem('momo_auth', '1');
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+    document.getElementById('loginPass').value = '';
+  }
+}
+
+// 檢查是否已登入（同一瀏覽器 session 內不用重複登入）
+(function() {
+  if (sessionStorage.getItem('momo_auth') === '1') {
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('mainPage').style.display  = 'block';
+  }
+})();
+
 // ==========================================
 // 工具函式
 // ==========================================
@@ -608,5 +663,6 @@ async function doBroadcast() {
   }
 }
 </script>
+</div><!-- end mainPage -->
 </body>
 </html>
