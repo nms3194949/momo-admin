@@ -86,6 +86,15 @@ tr:hover td { background: #1E293B55; }
 .toast-ok  { background: #16A34A; }
 .toast-err { background: #DC2626; }
 
+/* ── 批量操作 ── */
+.batch-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #1E293B; border-top: 1px solid #F59E0B; padding: 10px 16px; display: none; z-index: 200; align-items: center; justify-content: space-between; gap: 8px; }
+.batch-bar.show { display: flex; }
+.batch-info { font-size: 13px; color: #E2E8F0; }
+.batch-info strong { color: #F59E0B; }
+.batch-actions { display: flex; gap: 8px; }
+.pending-add    { background: #0F172A; border: 1px dashed #34D399; color: #34D399; }
+.pending-delete { background: #0F172A; border: 1px dashed #F87171; color: #F87171; text-decoration: line-through; opacity: 0.7; }
+
 /* ── 登入頁 ── */
 .login-wrap { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #0F172A; }
 .login-box { background: #1E293B; border: 1px solid #334155; border-radius: 14px; padding: 32px 28px; width: 320px; }
@@ -618,7 +627,7 @@ function renderPolicies(rows) {
         <td>NT$ ${fmtNum(cost)}</td>
         <td class="${cls}">NT$ ${fmtNum(value)}<br><span style="font-size:10px">${pct}%</span></td>
         <td>${r.date}</td>
-        <td><button class="btn btn-danger btn-sm" onclick="deleteFund(${r.row},'${esc(r.fund)}')">🗑</button></td>
+        <td><button class="btn btn-danger btn-sm del-btn" data-row="${r.row}" onclick="deleteFund(${r.row},'${esc(r.fund)}',this)">🗑</button></td>
       </tr>
     `;
   }).join('');
@@ -648,7 +657,71 @@ async function showAddFund(client, policy) {
   }
 }
 
-async function doAddFund() {
+// ==========================================
+// 批量變更管理
+// ==========================================
+let pendingChanges = []; // { type: 'add'|'delete', data: {...} }
+
+function updateBatchBar() {
+  const bar   = document.getElementById('batchBar');
+  const count = pendingChanges.length;
+  const adds  = pendingChanges.filter(c => c.type === 'add').length;
+  const dels  = pendingChanges.filter(c => c.type === 'delete').length;
+
+  document.getElementById('batchCount').textContent = count;
+  const parts = [];
+  if (adds) parts.push('新增 ' + adds + ' 筆');
+  if (dels) parts.push('刪除 ' + dels + ' 筆');
+  document.getElementById('batchDetail').textContent = parts.join('、');
+
+  bar.classList.toggle('show', count > 0);
+}
+
+function clearBatch() {
+  pendingChanges = [];
+  updateBatchBar();
+  // 重新渲染，清除暫存標記
+  renderPolicies(allPolicies);
+}
+
+async function applyBatch() {
+  if (!pendingChanges.length) return;
+  const btn = document.getElementById('btnApplyBatch');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> 處理中...';
+
+  let successCount = 0, failCount = 0;
+
+  for (const change of pendingChanges) {
+    try {
+      let res;
+      if (change.type === 'add') {
+        const d = change.data;
+        res = await api({ api: 'addPolicyRow', client: d.client, policy: d.policy, fund: d.fund, units: d.units, price: d.price, rate: d.rate });
+      } else if (change.type === 'delete') {
+        res = await api({ api: 'deletePolicyRow', row: change.data.row });
+      }
+      if (res && res.ok) successCount++;
+      else failCount++;
+    } catch(e) { failCount++; }
+  }
+
+  btn.disabled = false;
+  btn.textContent = '✅ 套用變更';
+  pendingChanges = [];
+  updateBatchBar();
+
+  showToast('✅ 成功 ' + successCount + ' 筆' + (failCount ? '，失敗 ' + failCount + ' 筆' : ''));
+
+  // 重新載入表格
+  const activeClient = document.querySelector('#clientFilters .filter-btn.active').dataset.client;
+  await filterPolicies(activeClient);
+}
+
+// ==========================================
+// 新增基金（暫存模式）
+// ==========================================
+function doAddFund() {
   const client = document.getElementById('addClient').value;
   const policy = document.getElementById('addPolicy').value;
   const fund   = document.getElementById('addFund').value;
@@ -661,28 +734,65 @@ async function doAddFund() {
   if (!price) return showToast('請輸入平均價格', 'err');
   if (!rate)  return showToast('請輸入平均匯率', 'err');
 
-  const res = await api({ api: 'addPolicyRow', client, policy, fund, units, price, rate });
-  if (res && res.ok) {
-    showToast('✅ ' + res.msg);
-    document.getElementById('addFundCard').style.display = 'none';
-    // 重新載入表格
-    const activeClient = document.querySelector('.filter-btn.active').dataset.client;
-    filterPolicies(activeClient);
-  } else {
-    showToast('❌ ' + (res && res.msg || '新增失敗'), 'err');
-  }
+  // 加入暫存
+  pendingChanges.push({ type: 'add', data: { client, policy, fund, units, price, rate } });
+  updateBatchBar();
+
+  // 在表格裡顯示暫存列（綠色虛線）
+  const tbody = document.getElementById('policiesTbody');
+  const tr = document.createElement('tr');
+  tr.className = 'pending-add';
+  tr.innerHTML = `
+    <td>${esc(client)}</td>
+    <td>${esc(policy)}</td>
+    <td>${esc(fund)} <span style="font-size:10px;color:#34D399">（待新增）</span></td>
+    <td>${units}</td><td>${price}</td><td>${rate}</td>
+    <td>-</td><td>-</td><td>-</td>
+    <td><button class="btn btn-sec btn-sm" onclick="removePending(this, ${pendingChanges.length-1})">✕</button></td>
+  `;
+  // 插入到對應保單群組的最後
+  const rows = tbody.querySelectorAll('tr');
+  let insertAfter = null;
+  rows.forEach(r => {
+    const cells = r.querySelectorAll('td');
+    if (cells.length > 1 && cells[1] && cells[1].textContent === policy) insertAfter = r;
+  });
+  if (insertAfter) insertAfter.after(tr);
+  else tbody.appendChild(tr);
+
+  document.getElementById('addFundCard').style.display = 'none';
+  showToast('已加入待新增清單');
 }
 
-async function deleteFund(row, fundName) {
-  if (!confirm('確定刪除「' + fundName + '」？\n此操作無法復原！')) return;
-  const res = await api({ api: 'deletePolicyRow', row });
-  if (res && res.ok) {
-    showToast('✅ 已刪除');
-    const activeClient = document.querySelector('.filter-btn.active').dataset.client;
-    filterPolicies(activeClient);
-  } else {
-    showToast('❌ ' + (res && res.msg || '刪除失敗'), 'err');
+function removePending(btn, idx) {
+  pendingChanges.splice(idx, 1);
+  btn.closest('tr').remove();
+  updateBatchBar();
+}
+
+// ==========================================
+// 刪除基金（暫存模式）
+// ==========================================
+function deleteFund(row, fundName, trEl) {
+  // 找到對應的 tr
+  const tr = trEl ? trEl.closest('tr') : document.querySelector(`[data-row="${row}"]`);
+
+  // 檢查是否已在待刪清單
+  const exists = pendingChanges.find(c => c.type === 'delete' && c.data.row === row);
+  if (exists) {
+    // 取消待刪
+    pendingChanges = pendingChanges.filter(c => !(c.type === 'delete' && c.data.row === row));
+    if (tr) tr.classList.remove('pending-delete');
+    if (tr) tr.querySelector('.del-btn').textContent = '🗑';
+    updateBatchBar();
+    return;
   }
+
+  // 加入待刪清單
+  pendingChanges.push({ type: 'delete', data: { row, fundName } });
+  if (tr) tr.classList.add('pending-delete');
+  if (tr) tr.querySelector('.del-btn').textContent = '↩';
+  updateBatchBar();
 }
 
 async function editCell(row, field, td) {
@@ -901,6 +1011,17 @@ async function doBroadcast() {
   }
 }
 </script>
+  <!-- 批量操作列 -->
+  <div class="batch-bar" id="batchBar">
+    <div class="batch-info">
+      待處理：<strong id="batchCount">0</strong> 項變更
+      <span id="batchDetail" style="color:#64748B;font-size:11px;margin-left:8px"></span>
+    </div>
+    <div class="batch-actions">
+      <button class="btn btn-sec" onclick="clearBatch()">✕ 取消</button>
+      <button class="btn" id="btnApplyBatch" onclick="applyBatch()">✅ 套用變更</button>
+    </div>
+  </div>
 </div><!-- end mainPage -->
 </body>
 </html>
