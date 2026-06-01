@@ -289,7 +289,7 @@ async function doLogin() {
 // ==========================================
 // 工具
 // ==========================================
-let curUid = '', curUser = {};
+let curUid = '', curUser = {}, lastSearchResults = [];
 
 async function api(params) {
   setStatus('載入中...');
@@ -351,6 +351,7 @@ function switchTab(name) {
 // 會員搜尋（含頭像）
 // ==========================================
 function renderUserList(data, box) {
+  if (data && data.length) lastSearchResults = data; // 存快取
   if (!data || !data.length) {
     box.innerHTML = '<div class="hint" style="padding:8px 0">查無結果</div>';
     return;
@@ -399,12 +400,17 @@ function loadMember(u) {
   document.getElementById('dBirth').value       = u.birthday || '';
   document.getElementById('searchList').innerHTML = '';
   document.getElementById('memberDetail').classList.remove('hidden');
+  document.getElementById('q').value = document.getElementById('q').value; // 保留關鍵字
   loadMemberCoupons(u.uid);
 }
 
 function closeDetail() {
   document.getElementById('memberDetail').classList.add('hidden');
   curUid = ''; curUser = {};
+  // 恢復上次搜尋結果
+  if (lastSearchResults.length > 0) {
+    renderUserList(lastSearchResults, document.getElementById('searchList'));
+  }
 }
 
 async function loadMemberCoupons(uid) {
