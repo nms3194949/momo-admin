@@ -7,52 +7,38 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #0F172A; color: #E2E8F0; font-family: Arial, sans-serif; min-height: 100vh; }
-
-/* ── 頂部 ── */
 .topbar { background: #1E293B; border-bottom: 1px solid #334155; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
 .topbar-title { color: #F59E0B; font-weight: bold; font-size: 16px; }
 .topbar-status { font-size: 11px; color: #64748B; }
-
-/* ── Tab 導覽 ── */
 .tabs { display: flex; background: #1E293B; border-bottom: 1px solid #334155; }
 .tab { flex: 1; padding: 10px 4px; text-align: center; font-size: 12px; color: #64748B; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
 .tab.active { color: #F59E0B; border-bottom-color: #F59E0B; }
 .tab:hover { color: #E2E8F0; }
-
-/* ── 內容區 ── */
 .panel { display: none; padding: 12px; }
 .panel.active { display: block; }
-
-/* ── 卡片 ── */
 .card { background: #1E293B; border: 1px solid #334155; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
-
-/* ── 輸入 ── */
 .inp { width: 100%; background: #0F172A; border: 1px solid #334155; color: #E2E8F0; padding: 8px 10px; border-radius: 7px; font-size: 13px; margin-bottom: 8px; }
 .inp:focus { outline: none; border-color: #F59E0B; }
 textarea.inp { resize: vertical; min-height: 80px; }
 .lbl { font-size: 11px; color: #94A3B8; margin-bottom: 4px; display: block; }
-
-/* ── 按鈕 ── */
 .btn { background: linear-gradient(90deg,#F59E0B,#D97706); color: #000; font-weight: bold; border: none; border-radius: 7px; padding: 8px 16px; cursor: pointer; font-size: 13px; }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .btn-sec { background: #334155; color: #E2E8F0; border: 1px solid #475569; }
 .btn-danger { background: #DC2626; color: #fff; border: none; }
 .btn-sm { padding: 4px 10px; font-size: 11px; border-radius: 5px; }
 .btn-full { width: 100%; }
-
-/* ── 搜尋列 ── */
 .row { display: flex; gap: 8px; align-items: center; }
 .row .inp { margin: 0; flex: 1; }
-
-/* ── 結果列表 ── */
-.result-item { padding: 8px 10px; background: #0F172A; border: 1px solid #334155; border-radius: 7px; cursor: pointer; margin-top: 6px; }
+/* ── 搜尋結果 ── */
+.result-item { padding: 8px 10px; background: #0F172A; border: 1px solid #334155; border-radius: 7px; cursor: pointer; margin-top: 6px; display: flex; align-items: center; gap: 10px; }
 .result-item:hover { border-color: #F59E0B; }
+.result-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 2px solid #334155; background: #334155; }
+.result-info { flex: 1; min-width: 0; }
 .result-name { display: flex; justify-content: space-between; font-size: 13px; }
-.result-uid { font-size: 10px; color: #475569; font-family: monospace; margin-top: 2px; }
+.result-uid { font-size: 10px; color: #475569; font-family: monospace; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .result-tags { font-size: 11px; color: #60A5FA; margin-top: 2px; }
 .badge-active { color: #34D399; font-size: 11px; }
 .badge-other  { color: #64748B; font-size: 11px; }
-
 /* ── 會員詳情 ── */
 .detail-hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
 .detail-name { color: #F59E0B; font-size: 16px; font-weight: bold; }
@@ -61,7 +47,6 @@ textarea.inp { resize: vertical; min-height: 80px; }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
 .coupon-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #1E293B; font-size: 12px; }
 .coupon-exp { color: #64748B; font-size: 11px; }
-
 /* ── 保單表格 ── */
 .table-wrap { overflow-x: auto; margin-top: 8px; }
 table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 600px; }
@@ -75,18 +60,12 @@ tr:hover td { background: #1E293B55; }
 .value-pos { color: #FF4D4F; }
 .value-neg { color: #52C41A; }
 .value-neu { color: #94A3B8; }
-
-/* ── Filter ── */
 .filter-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
 .filter-btn { padding: 4px 10px; font-size: 11px; border-radius: 5px; cursor: pointer; border: 1px solid #334155; background: #1E293B; color: #94A3B8; }
 .filter-btn.active { border-color: #F59E0B; color: #F59E0B; background: #1E293B; }
-
-/* ── Toast ── */
 .toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); padding: 8px 20px; border-radius: 8px; font-size: 13px; color: #fff; display: none; z-index: 999; white-space: nowrap; box-shadow: 0 4px 16px rgba(0,0,0,0.5); }
 .toast-ok  { background: #16A34A; }
 .toast-err { background: #DC2626; }
-
-/* ── 批量操作 ── */
 .batch-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #1E293B; border-top: 1px solid #F59E0B; padding: 10px 16px; display: none; z-index: 200; align-items: center; justify-content: space-between; gap: 8px; }
 .batch-bar.show { display: flex; }
 .batch-info { font-size: 13px; color: #E2E8F0; }
@@ -94,15 +73,11 @@ tr:hover td { background: #1E293B55; }
 .batch-actions { display: flex; gap: 8px; }
 .pending-add    { background: #0F172A; border: 1px dashed #34D399; color: #34D399; }
 .pending-delete { background: #0F172A; border: 1px dashed #F87171; color: #F87171; text-decoration: line-through; opacity: 0.7; }
-
-/* ── 登入頁 ── */
 .login-wrap { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #0F172A; }
 .login-box { background: #1E293B; border: 1px solid #334155; border-radius: 14px; padding: 32px 28px; width: 320px; }
 .login-logo { text-align: center; color: #F59E0B; font-size: 22px; font-weight: bold; margin-bottom: 6px; }
 .login-sub  { text-align: center; color: #64748B; font-size: 12px; margin-bottom: 24px; }
 .login-err  { color: #F87171; font-size: 12px; text-align: center; margin-top: 8px; display: none; }
-
-/* ── Spinner ── */
 .spin { border: 2px solid #334155; border-top-color: #F59E0B; border-radius: 50%; width: 16px; height: 16px; animation: sp 0.8s linear infinite; display: inline-block; vertical-align: middle; }
 @keyframes sp { to { transform: rotate(360deg); } }
 .hint { font-size: 11px; color: #475569; margin-top: 4px; }
@@ -126,23 +101,18 @@ tr:hover td { background: #1E293B55; }
   </div>
 </div>
 
-<!-- 主頁面（登入後顯示）-->
+<!-- 主頁面 -->
 <div id="mainPage" style="display:none">
-
-<!-- 設定 GAS URL -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-  // ★ 請替換成你的 GAS Web App URL
   const GAS_URL = 'https://script.google.com/macros/s/AKfycbzLTMeKabdT9vj3EuuqGBxIQY3m_b-zsQIFgpfgy6JZRYYHO_8uUeqy3Ay7m33UhvKK/exec';
 </script>
 
-<!-- 頂部 -->
 <div class="topbar">
   <div class="topbar-title">⚙️ MOMO 管理後台</div>
   <div class="topbar-status" id="statusText">就緒</div>
 </div>
 
-<!-- Tab 導覽 -->
 <div class="tabs">
   <div class="tab active" onclick="switchTab('members')">👥 會員</div>
   <div class="tab" onclick="switchTab('policies')">📊 保單</div>
@@ -151,20 +121,18 @@ tr:hover td { background: #1E293B55; }
   <div class="tab" onclick="switchTab('broadcast')">📢 廣播</div>
 </div>
 
-<!-- ==================== 會員 Tab ==================== -->
+<!-- 會員 Tab -->
 <div id="tab-members" class="panel active">
-
-  <!-- 搜尋 -->
   <div class="card">
     <div class="lbl">🔍 會員搜尋 (UID / 名稱)</div>
     <div class="row">
-      <input id="q" class="inp" placeholder="輸入關鍵字..." onkeydown="if(event.key==='Enter')doSearch()">
+      <input id="q" class="inp" placeholder="輸入關鍵字，或留空顯示全部..." onkeydown="if(event.key==='Enter')doSearch()">
       <button class="btn" id="btnSearch" onclick="doSearch()">搜尋</button>
+      <button class="btn btn-sec" id="btnAll" onclick="doShowAll()">全部</button>
     </div>
     <div id="searchList"></div>
   </div>
 
-  <!-- 會員詳情 -->
   <div id="memberDetail" class="card hidden" style="border-left:3px solid #F59E0B">
     <div class="detail-hdr">
       <div>
@@ -173,16 +141,9 @@ tr:hover td { background: #1E293B55; }
       </div>
       <button class="close-btn" onclick="closeDetail()">✕</button>
     </div>
-
     <div class="grid2">
-      <div>
-        <label class="lbl">🏷️ 標籤</label>
-        <input id="dTags" class="inp" placeholder="逗號分隔">
-      </div>
-      <div>
-        <label class="lbl">🎂 生日 (YYYY/MM/DD)</label>
-        <input id="dBirth" class="inp" placeholder="1990/1/1">
-      </div>
+      <div><label class="lbl">🏷️ 標籤</label><input id="dTags" class="inp" placeholder="逗號分隔"></div>
+      <div><label class="lbl">🎂 生日</label><input id="dBirth" class="inp" placeholder="1990/1/1"></div>
     </div>
     <div class="grid2" style="margin-bottom:10px">
       <button class="btn btn-sec" onclick="saveAttr('tags')">💾 儲存標籤</button>
@@ -192,13 +153,12 @@ tr:hover td { background: #1E293B55; }
       <button class="btn btn-sec" onclick="grantCoupon()">🎁 補發券</button>
       <button class="btn btn-danger" onclick="redeemCoupon()">✅ 核銷券</button>
     </div>
-
     <div class="lbl">持有票券 (Active)</div>
     <div id="dCoupons"><span class="hint">載入中...</span></div>
   </div>
 </div>
 
-<!-- ==================== 保單 Tab ==================== -->
+<!-- 保單 Tab -->
 <div id="tab-policies" class="panel">
   <div class="card">
     <div class="section-title">篩選客戶</div>
@@ -208,44 +168,22 @@ tr:hover td { background: #1E293B55; }
     <div id="policiesLoading" class="hint">點擊篩選客戶以載入資料</div>
     <div class="table-wrap">
       <table id="policiesTable" class="hidden">
-        <thead>
-          <tr>
-            <th>客戶</th><th>保單</th><th>基金名稱</th>
-            <th>單位數</th><th>平均價格</th><th>平均匯率</th>
-            <th>持有成本</th><th>目前市值</th><th>日期</th><th></th>
-          </tr>
-        </thead>
+        <thead><tr><th>客戶</th><th>保單</th><th>基金名稱</th><th>單位數</th><th>平均價格</th><th>平均匯率</th><th>持有成本</th><th>目前市值</th><th>日期</th><th></th></tr></thead>
         <tbody id="policiesTbody"></tbody>
       </table>
     </div>
   </div>
-
-  <!-- 新增基金表單 -->
   <div class="card" id="addFundCard" style="display:none">
     <div class="section-title">➕ 新增基金</div>
     <div class="grid2">
-      <div>
-        <label class="lbl">客戶名稱</label>
-        <input id="addClient" class="inp" placeholder="例：亞婷" readonly>
-      </div>
-      <div>
-        <label class="lbl">保單名稱</label>
-        <input id="addPolicy" class="inp" placeholder="例：亞婷安達" readonly>
-      </div>
+      <div><label class="lbl">客戶名稱</label><input id="addClient" class="inp" readonly></div>
+      <div><label class="lbl">保單名稱</label><input id="addPolicy" class="inp" readonly></div>
     </div>
     <label class="lbl">基金名稱</label>
-    <select id="addFund" class="inp" style="cursor:pointer">
-      <option value="">-- 載入中 --</option>
-    </select>
+    <select id="addFund" class="inp" style="cursor:pointer"><option value="">-- 載入中 --</option></select>
     <div class="grid2">
-      <div>
-        <label class="lbl">單位數</label>
-        <input id="addUnits" class="inp" type="number" placeholder="0.000000">
-      </div>
-      <div>
-        <label class="lbl">平均價格</label>
-        <input id="addPrice" class="inp" type="number" placeholder="0.0000">
-      </div>
+      <div><label class="lbl">單位數</label><input id="addUnits" class="inp" type="number"></div>
+      <div><label class="lbl">平均價格</label><input id="addPrice" class="inp" type="number"></div>
     </div>
     <label class="lbl">平均匯率</label>
     <input id="addRate" class="inp" type="number" placeholder="1（台幣基金填 1）">
@@ -256,50 +194,37 @@ tr:hover td { background: #1E293B55; }
   </div>
 </div>
 
-<!-- ==================== 資產紀錄 Tab ==================== -->
+<!-- 資產紀錄 Tab -->
 <div id="tab-history" class="panel">
   <div class="card">
     <div class="section-title">選擇客戶</div>
-    <div class="filter-row" id="historyFilters">
-      <span class="hint">載入中...</span>
-    </div>
+    <div class="filter-row" id="historyFilters"><span class="hint">載入中...</span></div>
     <div id="historyLoading" class="hint"></div>
   </div>
-
-  <!-- 資產總計折線圖 -->
   <div class="card" id="historyTotalCard" style="display:none">
     <div class="section-title" id="historyTotalTitle">資產總計走勢</div>
     <canvas id="chartTotal" style="width:100%;max-height:220px"></canvas>
   </div>
-
-  <!-- 各保單折線圖 -->
   <div class="card" id="historyDetailCard" style="display:none">
     <div class="section-title">各保單走勢</div>
     <canvas id="chartDetail" style="width:100%;max-height:260px"></canvas>
   </div>
-
-  <!-- 數據摘要 -->
   <div id="historySummary"></div>
 </div>
 
-<!-- ==================== 優惠券 Tab ==================== -->
+<!-- 優惠券 Tab -->
 <div id="tab-coupons" class="panel">
   <div class="card">
     <div class="lbl">🔍 查詢會員優惠券 (UID)</div>
-    <div class="row">
-      <input id="cUid" class="inp" placeholder="輸入 UID...">
-      <button class="btn" onclick="loadCoupons()">查詢</button>
-    </div>
+    <div class="row"><input id="cUid" class="inp" placeholder="輸入 UID..."><button class="btn" onclick="loadCoupons()">查詢</button></div>
     <div id="couponResult" style="margin-top:8px"></div>
   </div>
-
   <div class="card">
     <div class="lbl">🎁 手動補發優惠券</div>
     <input id="grantUid"  class="inp" placeholder="UID">
     <input id="grantName" class="inp" placeholder="券名稱">
     <button class="btn btn-full" onclick="doGrant()">補發</button>
   </div>
-
   <div class="card">
     <div class="lbl">✅ 手動核銷優惠券</div>
     <input id="redeemUid"  class="inp" placeholder="UID">
@@ -308,7 +233,7 @@ tr:hover td { background: #1E293B55; }
   </div>
 </div>
 
-<!-- ==================== 廣播 Tab ==================== -->
+<!-- 廣播 Tab -->
 <div id="tab-broadcast" class="panel">
   <div class="card">
     <div class="lbl">📢 分眾廣播 Push</div>
@@ -319,29 +244,23 @@ tr:hover td { background: #1E293B55; }
   </div>
 </div>
 
-<!-- Toast -->
 <div id="toast" class="toast"></div>
 
 <script>
 // ==========================================
-// 登入邏輯（帳密由 GAS Script Properties 驗證）
+// 登入
 // ==========================================
-
 async function doLogin() {
   const user = document.getElementById('loginUser').value.trim();
   const pass = document.getElementById('loginPass').value;
   if (!user || !pass) return;
-
   const btn = document.querySelector('#loginPage .btn');
-  btn.disabled = true;
-  btn.textContent = '驗證中...';
+  btn.disabled = true; btn.textContent = '驗證中...';
   document.getElementById('loginErr').style.display = 'none';
-
   try {
-    const url = GAS_URL + '?' + new URLSearchParams({ api: 'login', user, pass }).toString();
+    const url  = GAS_URL + '?' + new URLSearchParams({ api: 'login', user, pass }).toString();
     const res  = await fetch(url);
     const data = await res.json();
-
     if (data && data.ok) {
       sessionStorage.setItem('momo_auth', '1');
       document.getElementById('loginPage').style.display = 'none';
@@ -356,12 +275,9 @@ async function doLogin() {
     document.getElementById('loginErr').textContent    = '連線失敗，請稍後再試';
     document.getElementById('loginErr').style.display = 'block';
   }
-
-  btn.disabled = false;
-  btn.textContent = '登入';
+  btn.disabled = false; btn.textContent = '登入';
 }
 
-// 檢查是否已登入（同一瀏覽器 session 內不用重複登入）
 (function() {
   if (sessionStorage.getItem('momo_auth') === '1') {
     document.getElementById('loginPage').style.display = 'none';
@@ -371,14 +287,14 @@ async function doLogin() {
 })();
 
 // ==========================================
-// 工具函式
+// 工具
 // ==========================================
 let curUid = '', curUser = {};
 
 async function api(params) {
   setStatus('載入中...');
   try {
-    const url = GAS_URL + '?' + new URLSearchParams(params).toString();
+    const url  = GAS_URL + '?' + new URLSearchParams(params).toString();
     const res  = await fetch(url);
     const data = await res.json();
     setStatus('就緒');
@@ -392,35 +308,6 @@ async function api(params) {
 
 function setStatus(t) { document.getElementById('statusText').textContent = t; }
 
-// ==========================================
-// 初始化：動態載入客戶清單
-// ==========================================
-let clientList = [];
-
-async function initClientList() {
-  const data = await api({ api: 'getClientList' });
-  if (!data || !data.ok) return;
-  clientList = data.clients;
-
-  // 保單篩選按鈕
-  const policyBox = document.getElementById('clientFilters');
-  const extraBtns = clientList.map(c => `
-    <button class="filter-btn" onclick="filterPolicies('${esc(c.name)}')" data-client="${esc(c.name)}">${esc(c.name)}</button>
-  `).join('');
-  policyBox.innerHTML = `
-    <button class="filter-btn active" onclick="filterPolicies('')" data-client="">全部</button>
-    ${extraBtns}
-  `;
-
-  // 資產紀錄篩選按鈕（只顯示有歷史分頁的客戶）
-  const historyBox = document.getElementById('historyFilters');
-  historyBox.innerHTML = clientList
-    .filter(c => c.historySheet)
-    .map(c => `
-      <button class="filter-btn" onclick="loadHistory('${esc(c.name)}')" data-h="${esc(c.name)}">${esc(c.name)}</button>
-    `).join('');
-}
-
 function showToast(msg, type) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -429,63 +316,79 @@ function showToast(msg, type) {
   setTimeout(() => t.style.display = 'none', 3000);
 }
 
-function esc(s) {
-  return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
-}
+function esc(s) { return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : ''; }
+function fmtNum(n) { return (parseFloat(n)||0).toLocaleString('zh-TW',{maximumFractionDigits:0}); }
+function profitClass(cost,val) { const d=val-cost; return d>0?'value-pos':d<0?'value-neg':'value-neu'; }
 
-function fmtNum(n) {
-  const v = parseFloat(n) || 0;
-  return v.toLocaleString('zh-TW', { maximumFractionDigits: 0 });
-}
+// ==========================================
+// 客戶清單初始化
+// ==========================================
+let clientList = [];
 
-function profitClass(cost, val) {
-  const diff = val - cost;
-  return diff > 0 ? 'value-pos' : diff < 0 ? 'value-neg' : 'value-neu';
+async function initClientList() {
+  const data = await api({ api: 'getClientList' });
+  if (!data || !data.ok) return;
+  clientList = data.clients;
+  const policyBox = document.getElementById('clientFilters');
+  policyBox.innerHTML = `<button class="filter-btn active" onclick="filterPolicies('')" data-client="">全部</button>` +
+    clientList.map(c => `<button class="filter-btn" onclick="filterPolicies('${esc(c.name)}')" data-client="${esc(c.name)}">${esc(c.name)}</button>`).join('');
+  const historyBox = document.getElementById('historyFilters');
+  historyBox.innerHTML = clientList.filter(c => c.historySheet)
+    .map(c => `<button class="filter-btn" onclick="loadHistory('${esc(c.name)}')" data-h="${esc(c.name)}">${esc(c.name)}</button>`).join('');
 }
 
 // ==========================================
 // Tab 切換
 // ==========================================
 function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t,i) => {
-    const names = ['members','policies','history','coupons','broadcast'];
-    t.classList.toggle('active', names[i] === name);
-  });
+  const names = ['members','policies','history','coupons','broadcast'];
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', names[i] === name));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
 }
 
 // ==========================================
-// 會員搜尋
+// 會員搜尋（含頭像）
 // ==========================================
-async function doSearch() {
-  const q = document.getElementById('q').value.trim();
-  if (!q) return showToast('請輸入關鍵字', 'err');
-
-  const btn = document.getElementById('btnSearch');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spin"></span>';
-
-  const data = await api({ api: 'searchUsers', q });
-  btn.disabled = false;
-  btn.textContent = '搜尋';
-
-  const box = document.getElementById('searchList');
+function renderUserList(data, box) {
   if (!data || !data.length) {
     box.innerHTML = '<div class="hint" style="padding:8px 0">查無結果</div>';
     return;
   }
-
   box.innerHTML = data.map(u => `
-    <div class="result-item" onclick="loadMember(${JSON.stringify(u).replace(/"/g,'&quot;')})">
-      <div class="result-name">
-        <span>${esc(u.name)}</span>
-        <span class="${u.status==='Active'?'badge-active':'badge-other'}">${u.status}</span>
+    <div class="result-item" onclick='loadMember(${JSON.stringify(u).replace(/'/g,"&#39;")})'>
+      ${u.picture
+        ? `<img class="result-avatar" src="${esc(u.picture)}" onerror="this.style.display='none'">`
+        : `<div class="result-avatar" style="display:flex;align-items:center;justify-content:center;font-size:18px;color:#64748B;">👤</div>`
+      }
+      <div class="result-info">
+        <div class="result-name">
+          <span>${esc(u.name)}</span>
+          <span class="${u.status==='Active'?'badge-active':'badge-other'}">${esc(u.status)}</span>
+        </div>
+        <div class="result-uid">${esc(u.uid)}</div>
+        ${u.tags ? `<div class="result-tags">🏷️ ${esc(u.tags)}</div>` : ''}
       </div>
-      <div class="result-uid">${u.uid}</div>
-      ${u.tags ? `<div class="result-tags">🏷️ ${esc(u.tags)}</div>` : ''}
     </div>
   `).join('');
+}
+
+async function doSearch() {
+  const q   = document.getElementById('q').value.trim();
+  const btn = document.getElementById('btnSearch');
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span>';
+  const data = await api({ api: 'searchUsers', q });
+  btn.disabled = false; btn.textContent = '搜尋';
+  renderUserList(data, document.getElementById('searchList'));
+}
+
+async function doShowAll() {
+  document.getElementById('q').value = '';
+  const btn = document.getElementById('btnAll');
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span>';
+  const data = await api({ api: 'searchUsers', q: '' });
+  btn.disabled = false; btn.textContent = '全部';
+  renderUserList(data, document.getElementById('searchList'));
 }
 
 function loadMember(u) {
@@ -511,12 +414,9 @@ async function loadMemberCoupons(uid) {
     document.getElementById('dCoupons').innerHTML = '<div class="hint">目前無 Active 票券</div>';
     return;
   }
-  document.getElementById('dCoupons').innerHTML = data.coupons.map(c => `
-    <div class="coupon-row">
-      <span>${esc(c.name)}</span>
-      <span class="coupon-exp">${c.expire}</span>
-    </div>
-  `).join('');
+  document.getElementById('dCoupons').innerHTML = data.coupons.map(c =>
+    `<div class="coupon-row"><span>${esc(c.name)}</span><span class="coupon-exp">${c.expire}</span></div>`
+  ).join('');
 }
 
 async function saveAttr(field) {
@@ -551,19 +451,11 @@ async function redeemCoupon() {
 let allPolicies = [];
 
 async function filterPolicies(client) {
-  document.querySelectorAll('.filter-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.client === client);
-  });
-
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.client === client));
   document.getElementById('policiesLoading').textContent = '載入中...';
   document.getElementById('policiesTable').classList.add('hidden');
-
   const data = await api({ api: 'getPolicies', client });
-  if (!data || !data.ok) {
-    document.getElementById('policiesLoading').textContent = '載入失敗';
-    return;
-  }
-
+  if (!data || !data.ok) { document.getElementById('policiesLoading').textContent = '載入失敗'; return; }
   allPolicies = data.rows;
   renderPolicies(data.rows);
   document.getElementById('policiesLoading').textContent = '';
@@ -572,68 +464,51 @@ async function filterPolicies(client) {
 
 function renderPolicies(rows) {
   const tbody = document.getElementById('policiesTbody');
-
-  // 先按保單分群，計算每張保單的加總
   const policyMap = {};
   rows.forEach(r => {
     const key = r.client + '||' + r.policy;
-    if (!policyMap[key]) policyMap[key] = { client: r.client, policy: r.policy, totalCost: 0, totalValue: 0 };
+    if (!policyMap[key]) policyMap[key] = { totalCost: 0, totalValue: 0 };
     policyMap[key].totalCost  += parseFloat(r.cost)  || 0;
     policyMap[key].totalValue += parseFloat(r.value) || 0;
   });
-
   let lastPolicy = '';
   tbody.innerHTML = rows.map(r => {
-    const isNewPolicy = r.policy !== lastPolicy;
-    lastPolicy = r.policy;
-    const cost  = parseFloat(r.cost)  || 0;
-    const value = parseFloat(r.value) || 0;
-    const pct   = cost > 0 ? ((value - cost) / cost * 100).toFixed(1) : '0.0';
+    const isNew = r.policy !== lastPolicy; lastPolicy = r.policy;
+    const cost  = parseFloat(r.cost)||0, value = parseFloat(r.value)||0;
+    const pct   = cost > 0 ? ((value-cost)/cost*100).toFixed(1) : '0.0';
     const cls   = profitClass(cost, value);
-
-    // 保單加總
-    const key        = r.client + '||' + r.policy;
-    const summary    = policyMap[key];
-    const totCost    = summary.totalCost;
-    const totValue   = summary.totalValue;
-    const totProfit  = totValue - totCost;
-    const totPct     = totCost > 0 ? ((totProfit / totCost) * 100).toFixed(2) : '0.00';
-    const totCls     = totProfit > 0 ? 'value-pos' : totProfit < 0 ? 'value-neg' : 'value-neu';
-    const totIcon    = totProfit > 0 ? '▲' : totProfit < 0 ? '▼' : '–';
-
+    const key   = r.client + '||' + r.policy;
+    const s     = policyMap[key];
+    const tp    = s.totalValue - s.totalCost;
+    const tpct  = s.totalCost > 0 ? ((tp/s.totalCost)*100).toFixed(2) : '0.00';
+    const tcls  = tp>0?'value-pos':tp<0?'value-neg':'value-neu';
+    const tic   = tp>0?'▲':tp<0?'▼':'–';
     return `
-      ${isNewPolicy ? `
-      <tr class="policy-group">
-        <td colspan="10">
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
-            <span class="policy-label">📋 ${esc(r.client)} — ${esc(r.policy)}</span>
-            <div style="display:flex;gap:12px;align-items:center;font-size:11px">
-              <span style="color:#94A3B8">持有成本 <strong style="color:#E2E8F0">NT$ ${fmtNum(totCost)}</strong></span>
-              <span style="color:#94A3B8">目前市值 <strong style="color:#E2E8F0">NT$ ${fmtNum(totValue)}</strong></span>
-              <span style="color:#94A3B8">損益 <strong class="${totCls}">${totIcon} NT$ ${fmtNum(totProfit)}</strong></span>
-              <span class="${totCls}" style="font-weight:bold;font-size:13px">${totPct}%</span>
-              <button class="btn btn-sec btn-sm" onclick="showAddFund('${esc(r.client)}','${esc(r.policy)}')">＋ 新增</button>
-            </div>
+      ${isNew ? `<tr class="policy-group"><td colspan="10">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+          <span class="policy-label">📋 ${esc(r.client)} — ${esc(r.policy)}</span>
+          <div style="display:flex;gap:12px;align-items:center;font-size:11px">
+            <span style="color:#94A3B8">持有成本 <strong style="color:#E2E8F0">NT$ ${fmtNum(s.totalCost)}</strong></span>
+            <span style="color:#94A3B8">目前市值 <strong style="color:#E2E8F0">NT$ ${fmtNum(s.totalValue)}</strong></span>
+            <span style="color:#94A3B8">損益 <strong class="${tcls}">${tic} NT$ ${fmtNum(tp)}</strong></span>
+            <span class="${tcls}" style="font-weight:bold;font-size:13px">${tpct}%</span>
+            <button class="btn btn-sec btn-sm" onclick="showAddFund('${esc(r.client)}','${esc(r.policy)}')">＋ 新增</button>
           </div>
-        </td>
-      </tr>` : ''}
+        </div>
+      </td></tr>` : ''}
       <tr>
-        <td>${esc(r.client)}</td>
-        <td>${esc(r.policy)}</td>
-        <td>${esc(r.fund)}</td>
-        <td class="editable" onclick="editCell(${r.row},'units',this)" title="點擊編輯">${r.units}</td>
-        <td class="editable" onclick="editCell(${r.row},'price',this)" title="點擊編輯">${r.price}</td>
-        <td class="editable" onclick="editCell(${r.row},'rate',this)"  title="點擊編輯">${r.rate}</td>
+        <td>${esc(r.client)}</td><td>${esc(r.policy)}</td><td>${esc(r.fund)}</td>
+        <td class="editable" onclick="editCell(${r.row},'units',this)">${r.units}</td>
+        <td class="editable" onclick="editCell(${r.row},'price',this)">${r.price}</td>
+        <td class="editable" onclick="editCell(${r.row},'rate',this)">${r.rate}</td>
         <td>NT$ ${fmtNum(cost)}</td>
         <td class="${cls}">NT$ ${fmtNum(value)}<br><span style="font-size:10px">${pct}%</span></td>
         <td>${r.date}</td>
         <td><button class="btn btn-danger btn-sm del-btn" data-row="${r.row}" onclick="deleteFund(${r.row},'${esc(r.fund)}',this)">🗑</button></td>
-      </tr>
-    `;
+      </tr>`;
   }).join('');
 }
 
-// 新增基金
 let fundList = [];
 async function showAddFund(client, policy) {
   document.getElementById('addClient').value = client;
@@ -643,84 +518,58 @@ async function showAddFund(client, policy) {
   document.getElementById('addRate').value   = '';
   document.getElementById('addFundCard').style.display = 'block';
   document.getElementById('addFundCard').scrollIntoView({ behavior: 'smooth' });
-
-  // 載入基金清單
   if (fundList.length === 0) {
     const sel = document.getElementById('addFund');
     sel.innerHTML = '<option>載入中...</option>';
     const data = await api({ api: 'getFundList' });
     if (data && data.funds) {
       fundList = data.funds;
-      sel.innerHTML = '<option value="">-- 請選擇基金 --</option>' +
-        data.funds.map(f => `<option value="${esc(f)}">${esc(f)}</option>`).join('');
+      sel.innerHTML = '<option value="">-- 請選擇基金 --</option>' + data.funds.map(f => `<option value="${esc(f)}">${esc(f)}</option>`).join('');
     }
   }
 }
 
-// ==========================================
-// 批量變更管理
-// ==========================================
-let pendingChanges = []; // { type: 'add'|'delete', data: {...} }
+let pendingChanges = [];
 
 function updateBatchBar() {
   const bar   = document.getElementById('batchBar');
   const count = pendingChanges.length;
   const adds  = pendingChanges.filter(c => c.type === 'add').length;
   const dels  = pendingChanges.filter(c => c.type === 'delete').length;
-
   document.getElementById('batchCount').textContent = count;
   const parts = [];
   if (adds) parts.push('新增 ' + adds + ' 筆');
   if (dels) parts.push('刪除 ' + dels + ' 筆');
   document.getElementById('batchDetail').textContent = parts.join('、');
-
   bar.classList.toggle('show', count > 0);
 }
 
-function clearBatch() {
-  pendingChanges = [];
-  updateBatchBar();
-  // 重新渲染，清除暫存標記
-  renderPolicies(allPolicies);
-}
+function clearBatch() { pendingChanges = []; updateBatchBar(); renderPolicies(allPolicies); }
 
 async function applyBatch() {
   if (!pendingChanges.length) return;
   const btn = document.getElementById('btnApplyBatch');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spin"></span> 處理中...';
-
-  let successCount = 0, failCount = 0;
-
-  for (const change of pendingChanges) {
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 處理中...';
+  let ok = 0, fail = 0;
+  for (const c of pendingChanges) {
     try {
       let res;
-      if (change.type === 'add') {
-        const d = change.data;
+      if (c.type === 'add') {
+        const d = c.data;
         res = await api({ api: 'addPolicyRow', client: d.client, policy: d.policy, fund: d.fund, units: d.units, price: d.price, rate: d.rate });
-      } else if (change.type === 'delete') {
-        res = await api({ api: 'deletePolicyRow', row: change.data.row });
+      } else {
+        res = await api({ api: 'deletePolicyRow', row: c.data.row });
       }
-      if (res && res.ok) successCount++;
-      else failCount++;
-    } catch(e) { failCount++; }
+      if (res && res.ok) ok++; else fail++;
+    } catch(e) { fail++; }
   }
-
-  btn.disabled = false;
-  btn.textContent = '✅ 套用變更';
-  pendingChanges = [];
-  updateBatchBar();
-
-  showToast('✅ 成功 ' + successCount + ' 筆' + (failCount ? '，失敗 ' + failCount + ' 筆' : ''));
-
-  // 重新載入表格
-  const activeClient = document.querySelector('#clientFilters .filter-btn.active').dataset.client;
-  await filterPolicies(activeClient);
+  btn.disabled = false; btn.textContent = '✅ 套用變更';
+  pendingChanges = []; updateBatchBar();
+  showToast('✅ 成功 ' + ok + ' 筆' + (fail ? '，失敗 ' + fail + ' 筆' : ''));
+  const ac = document.querySelector('#clientFilters .filter-btn.active').dataset.client;
+  await filterPolicies(ac);
 }
 
-// ==========================================
-// 新增基金（暫存模式）
-// ==========================================
 function doAddFund() {
   const client = document.getElementById('addClient').value;
   const policy = document.getElementById('addPolicy').value;
@@ -728,70 +577,33 @@ function doAddFund() {
   const units  = document.getElementById('addUnits').value;
   const price  = document.getElementById('addPrice').value;
   const rate   = document.getElementById('addRate').value;
-
   if (!fund)  return showToast('請選擇基金', 'err');
   if (!units) return showToast('請輸入單位數', 'err');
   if (!price) return showToast('請輸入平均價格', 'err');
   if (!rate)  return showToast('請輸入平均匯率', 'err');
-
-  // 加入暫存
   pendingChanges.push({ type: 'add', data: { client, policy, fund, units, price, rate } });
   updateBatchBar();
-
-  // 在表格裡顯示暫存列（綠色虛線）
   const tbody = document.getElementById('policiesTbody');
   const tr = document.createElement('tr');
   tr.className = 'pending-add';
-  tr.innerHTML = `
-    <td>${esc(client)}</td>
-    <td>${esc(policy)}</td>
-    <td>${esc(fund)} <span style="font-size:10px;color:#34D399">（待新增）</span></td>
-    <td>${units}</td><td>${price}</td><td>${rate}</td>
-    <td>-</td><td>-</td><td>-</td>
-    <td><button class="btn btn-sec btn-sm" onclick="removePending(this, ${pendingChanges.length-1})">✕</button></td>
-  `;
-  // 插入到對應保單群組的最後
-  const rows = tbody.querySelectorAll('tr');
-  let insertAfter = null;
-  rows.forEach(r => {
-    const cells = r.querySelectorAll('td');
-    if (cells.length > 1 && cells[1] && cells[1].textContent === policy) insertAfter = r;
-  });
-  if (insertAfter) insertAfter.after(tr);
-  else tbody.appendChild(tr);
-
+  tr.innerHTML = `<td>${esc(client)}</td><td>${esc(policy)}</td><td>${esc(fund)} <span style="font-size:10px;color:#34D399">（待新增）</span></td><td>${units}</td><td>${price}</td><td>${rate}</td><td>-</td><td>-</td><td>-</td><td><button class="btn btn-sec btn-sm" onclick="removePending(this,${pendingChanges.length-1})">✕</button></td>`;
+  tbody.appendChild(tr);
   document.getElementById('addFundCard').style.display = 'none';
   showToast('已加入待新增清單');
 }
 
-function removePending(btn, idx) {
-  pendingChanges.splice(idx, 1);
-  btn.closest('tr').remove();
-  updateBatchBar();
-}
+function removePending(btn, idx) { pendingChanges.splice(idx,1); btn.closest('tr').remove(); updateBatchBar(); }
 
-// ==========================================
-// 刪除基金（暫存模式）
-// ==========================================
 function deleteFund(row, fundName, trEl) {
-  // 找到對應的 tr
   const tr = trEl ? trEl.closest('tr') : document.querySelector(`[data-row="${row}"]`);
-
-  // 檢查是否已在待刪清單
   const exists = pendingChanges.find(c => c.type === 'delete' && c.data.row === row);
   if (exists) {
-    // 取消待刪
-    pendingChanges = pendingChanges.filter(c => !(c.type === 'delete' && c.data.row === row));
-    if (tr) tr.classList.remove('pending-delete');
-    if (tr) tr.querySelector('.del-btn').textContent = '🗑';
-    updateBatchBar();
-    return;
+    pendingChanges = pendingChanges.filter(c => !(c.type==='delete' && c.data.row===row));
+    if (tr) { tr.classList.remove('pending-delete'); tr.querySelector('.del-btn').textContent = '🗑'; }
+    updateBatchBar(); return;
   }
-
-  // 加入待刪清單
   pendingChanges.push({ type: 'delete', data: { row, fundName } });
-  if (tr) tr.classList.add('pending-delete');
-  if (tr) tr.querySelector('.del-btn').textContent = '↩';
+  if (tr) { tr.classList.add('pending-delete'); tr.querySelector('.del-btn').textContent = '↩'; }
   updateBatchBar();
 }
 
@@ -800,36 +612,24 @@ async function editCell(row, field, td) {
   const newVal = prompt('修改 ' + field + '（目前：' + oldVal + '）：', oldVal);
   if (newVal === null || newVal === oldVal) return;
   const res = await api({ api: 'updatePolicy', row, field, value: newVal });
-  if (res && res.ok) {
-    td.textContent = newVal;
-    showToast('✅ 已更新');
-  } else {
-    showToast('❌ ' + (res && res.msg || '更新失敗'), 'err');
-  }
+  if (res && res.ok) { td.textContent = newVal; showToast('✅ 已更新'); }
+  else showToast('❌ ' + (res && res.msg || '更新失敗'), 'err');
 }
 
 // ==========================================
-// 優惠券 Tab
+// 優惠券
 // ==========================================
 async function loadCoupons() {
   const uid = document.getElementById('cUid').value.trim();
   if (!uid) return showToast('請輸入 UID', 'err');
   const data = await api({ api: 'listCoupons', uid });
   const box  = document.getElementById('couponResult');
-  if (!data || !data.coupons || !data.coupons.length) {
-    box.innerHTML = '<div class="hint">目前無 Active 票券</div>';
-    return;
-  }
-  box.innerHTML = data.coupons.map(c => `
-    <div class="coupon-row">
-      <span>${esc(c.name)}</span>
-      <span class="coupon-exp">${c.expire}</span>
-    </div>
-  `).join('');
+  if (!data || !data.coupons || !data.coupons.length) { box.innerHTML = '<div class="hint">目前無 Active 票券</div>'; return; }
+  box.innerHTML = data.coupons.map(c => `<div class="coupon-row"><span>${esc(c.name)}</span><span class="coupon-exp">${c.expire}</span></div>`).join('');
 }
 
 async function doGrant() {
-  const uid  = document.getElementById('grantUid').value.trim();
+  const uid = document.getElementById('grantUid').value.trim();
   const name = document.getElementById('grantName').value.trim();
   if (!uid || !name) return showToast('請填寫 UID 和券名稱', 'err');
   const res = await api({ api: 'grantCoupon', uid, name });
@@ -837,7 +637,7 @@ async function doGrant() {
 }
 
 async function doRedeem() {
-  const uid  = document.getElementById('redeemUid').value.trim();
+  const uid = document.getElementById('redeemUid').value.trim();
   const name = document.getElementById('redeemName').value.trim();
   if (!uid || !name) return showToast('請填寫 UID 和券名稱', 'err');
   if (!confirm('確定核銷「' + name + '」？')) return;
@@ -849,138 +649,71 @@ async function doRedeem() {
 // 資產紀錄
 // ==========================================
 let chartTotalInst = null, chartDetailInst = null;
-
-const CHART_COLORS = [
-  '#F59E0B','#60A5FA','#34D399','#F87171','#A78BFA',
-  '#FB923C','#38BDF8','#4ADE80','#E879F9','#FACC15'
-];
+const CHART_COLORS = ['#F59E0B','#60A5FA','#34D399','#F87171','#A78BFA','#FB923C','#38BDF8','#4ADE80','#E879F9','#FACC15'];
 
 async function loadHistory(client) {
-  // 更新篩選按鈕
-  document.querySelectorAll('[data-h]').forEach(b => {
-    b.classList.toggle('active', b.dataset.h === client);
-  });
-
+  document.querySelectorAll('[data-h]').forEach(b => b.classList.toggle('active', b.dataset.h === client));
   document.getElementById('historyLoading').textContent = '載入中...';
   document.getElementById('historyTotalCard').style.display  = 'none';
   document.getElementById('historyDetailCard').style.display = 'none';
   document.getElementById('historySummary').innerHTML = '';
-
   const data = await api({ api: 'getAssetHistory', client });
   document.getElementById('historyLoading').textContent = '';
-
-  if (!data || !data.ok || !data.labels || !data.labels.length) {
-    document.getElementById('historyLoading').textContent = '查無資料';
-    return;
-  }
-
-  const labels   = data.labels;
-  const datasets = data.datasets;
-  const totalDs  = datasets.find(d => d.isTotal);
+  if (!data || !data.ok || !data.labels || !data.labels.length) { document.getElementById('historyLoading').textContent = '查無資料'; return; }
+  const labels = data.labels, datasets = data.datasets;
+  const totalDs = datasets.find(d => d.isTotal);
   const policyDs = datasets.filter(d => !d.isTotal);
-
-  // ── 資產總計折線圖 ──
   if (totalDs) {
     document.getElementById('historyTotalTitle').textContent = client + ' 資產總計走勢';
     document.getElementById('historyTotalCard').style.display = 'block';
-
     if (chartTotalInst) chartTotalInst.destroy();
     chartTotalInst = new Chart(document.getElementById('chartTotal'), {
       type: 'line',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: '資產總計',
-          data: totalDs.data,
-          borderColor: '#F59E0B',
-          backgroundColor: 'rgba(245,158,11,0.08)',
-          borderWidth: 2,
-          pointRadius: 1,
-          tension: 0.3,
-          fill: true
-        }]
-      },
-      options: chartOptions('NT$')
+      data: { labels, datasets: [{ label: '資產總計', data: totalDs.data, borderColor: '#F59E0B', backgroundColor: 'rgba(245,158,11,0.08)', borderWidth: 2, pointRadius: 1, tension: 0.3, fill: true }] },
+      options: chartOptions()
     });
   }
-
-  // ── 各保單折線圖 ──
   if (policyDs.length > 0) {
     document.getElementById('historyDetailCard').style.display = 'block';
-
     if (chartDetailInst) chartDetailInst.destroy();
     chartDetailInst = new Chart(document.getElementById('chartDetail'), {
       type: 'line',
-      data: {
-        labels: labels,
-        datasets: policyDs.map((ds, i) => ({
-          label: ds.label,
-          data: ds.data,
-          borderColor: CHART_COLORS[i % CHART_COLORS.length],
-          backgroundColor: 'transparent',
-          borderWidth: 1.5,
-          pointRadius: 0,
-          tension: 0.3
-        }))
-      },
-      options: chartOptions('NT$')
+      data: { labels, datasets: policyDs.map((ds,i) => ({ label: ds.label, data: ds.data, borderColor: CHART_COLORS[i%CHART_COLORS.length], backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, tension: 0.3 })) },
+      options: chartOptions()
     });
   }
-
-  // ── 數據摘要（最新一筆 vs 最早一筆）──
   const summaryBox = document.getElementById('historySummary');
-  const summaryRows = policyDs.concat(totalDs ? [totalDs] : []).map(ds => {
-    const vals    = ds.data.filter(v => v !== null);
+  summaryBox.innerHTML = policyDs.concat(totalDs?[totalDs]:[]).map(ds => {
+    const vals = ds.data.filter(v => v!==null);
     if (!vals.length) return '';
-    const first   = vals[0];
-    const last    = vals[vals.length - 1];
-    const profit  = last - first;
-    const pct     = first > 0 ? (profit / first * 100).toFixed(2) : '0.00';
-    const cls     = profit > 0 ? 'value-pos' : profit < 0 ? 'value-neg' : 'value-neu';
-    const icon    = profit > 0 ? '▲' : profit < 0 ? '▼' : '–';
-    const isTot   = ds.isTotal;
-    return `
-      <div class="card" style="${isTot ? 'border-left:3px solid #F59E0B' : ''}">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
-          <span style="font-size:13px;font-weight:${isTot?'bold':'normal'};color:${isTot?'#F59E0B':'#E2E8F0'}">${esc(ds.label)}</span>
-          <div style="display:flex;gap:12px;font-size:12px;align-items:center">
-            <span style="color:#64748B">最新 <strong style="color:#E2E8F0">NT$ ${fmtNum(last)}</strong></span>
-            <span class="${cls}" style="font-weight:bold">${icon} ${pct}%</span>
-            <span class="${cls}">NT$ ${fmtNum(profit)}</span>
-          </div>
+    const first = vals[0], last = vals[vals.length-1], profit = last-first;
+    const pct = first>0?(profit/first*100).toFixed(2):'0.00';
+    const cls = profit>0?'value-pos':profit<0?'value-neg':'value-neu';
+    const icon = profit>0?'▲':profit<0?'▼':'–';
+    return `<div class="card" style="${ds.isTotal?'border-left:3px solid #F59E0B':''}">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+        <span style="font-size:13px;font-weight:${ds.isTotal?'bold':'normal'};color:${ds.isTotal?'#F59E0B':'#E2E8F0'}">${esc(ds.label)}</span>
+        <div style="display:flex;gap:12px;font-size:12px;align-items:center">
+          <span style="color:#64748B">最新 <strong style="color:#E2E8F0">NT$ ${fmtNum(last)}</strong></span>
+          <span class="${cls}" style="font-weight:bold">${icon} ${pct}%</span>
+          <span class="${cls}">NT$ ${fmtNum(profit)}</span>
         </div>
-      </div>`;
+      </div>
+    </div>`;
   }).join('');
-  summaryBox.innerHTML = summaryRows;
 }
 
-function chartOptions(unit) {
+function chartOptions() {
   return {
     responsive: true,
     interaction: { mode: 'index', intersect: false },
     plugins: {
       legend: { labels: { color: '#94A3B8', font: { size: 11 } } },
-      tooltip: {
-        backgroundColor: '#1E293B',
-        titleColor: '#F59E0B',
-        bodyColor: '#E2E8F0',
-        callbacks: {
-          label: ctx => ' ' + ctx.dataset.label + ': NT$ ' + (ctx.parsed.y || 0).toLocaleString()
-        }
-      }
+      tooltip: { backgroundColor: '#1E293B', titleColor: '#F59E0B', bodyColor: '#E2E8F0', callbacks: { label: ctx => ' ' + ctx.dataset.label + ': NT$ ' + (ctx.parsed.y||0).toLocaleString() } }
     },
     scales: {
-      x: {
-        ticks: { color: '#475569', font: { size: 9 }, maxTicksLimit: 10 },
-        grid:  { color: '#1E293B' }
-      },
-      y: {
-        ticks: {
-          color: '#475569', font: { size: 9 },
-          callback: v => 'NT$' + (v/10000).toFixed(0) + 'w'
-        },
-        grid: { color: '#1E293B33' }
-      }
+      x: { ticks: { color: '#475569', font: { size: 9 }, maxTicksLimit: 10 }, grid: { color: '#1E293B' } },
+      y: { ticks: { color: '#475569', font: { size: 9 }, callback: v => 'NT$' + (v/10000).toFixed(0) + 'w' }, grid: { color: '#1E293B33' } }
     }
   };
 }
@@ -992,36 +725,28 @@ async function doBroadcast() {
   const tag = document.getElementById('bcTag').value.trim();
   const msg = document.getElementById('bcMsg').value.trim();
   if (!msg) return showToast('請輸入訊息內容', 'err');
-
   const target = tag ? '標籤「' + tag + '」的會員' : '所有 Active 會員';
   if (!confirm('確定發送給' + target + '？')) return;
-
   const btn = document.getElementById('btnBroadcast');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spin"></span> 發送中...';
-
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 發送中...';
   const res = await api({ api: 'broadcast', tag, msg });
-  btn.disabled = false;
-  btn.textContent = '🚀 發送推播';
-
+  btn.disabled = false; btn.textContent = '🚀 發送推播';
   if (res !== null) {
-    showToast('✅ 發送完成：' + (res.count || 0) + ' 人');
+    showToast('✅ 發送完成：' + (res.count||0) + ' 人');
     document.getElementById('bcMsg').value = '';
-    document.getElementById('bcTag').value = '';
+    document.getElementById('bcTag').value  = '';
   }
 }
 </script>
+
   <!-- 批量操作列 -->
   <div class="batch-bar" id="batchBar">
-    <div class="batch-info">
-      待處理：<strong id="batchCount">0</strong> 項變更
-      <span id="batchDetail" style="color:#64748B;font-size:11px;margin-left:8px"></span>
-    </div>
+    <div class="batch-info">待處理：<strong id="batchCount">0</strong> 項變更 <span id="batchDetail" style="color:#64748B;font-size:11px;margin-left:8px"></span></div>
     <div class="batch-actions">
       <button class="btn btn-sec" onclick="clearBatch()">✕ 取消</button>
       <button class="btn" id="btnApplyBatch" onclick="applyBatch()">✅ 套用變更</button>
     </div>
   </div>
-</div><!-- end mainPage -->
+</div>
 </body>
 </html>
