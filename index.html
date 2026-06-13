@@ -110,7 +110,10 @@ tr:hover td { background: #1E293B55; }
 
 <div class="topbar">
   <div class="topbar-title">⚙️ MOMO 管理後台</div>
-  <div class="topbar-status" id="statusText">就緒</div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <div class="topbar-status" id="statusText">就緒</div>
+    <button class="btn btn-sec btn-sm" onclick="doLogout()">登出</button>
+  </div>
 </div>
 
 <div class="tabs">
@@ -248,7 +251,19 @@ tr:hover td { background: #1E293B55; }
 
 <script>
 // ==========================================
-// 登入
+// 底層：POST + text/plain（避開 GAS 不支援的 CORS preflight）
+// ==========================================
+async function postGas(body) {
+  const res = await fetch(GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(body)
+  });
+  return res.json();
+}
+
+// ==========================================
+// 登入 / 登出
 // ==========================================
 async function doLogin() {
   const user = document.getElementById('loginUser').value.trim();
@@ -258,28 +273,34 @@ async function doLogin() {
   btn.disabled = true; btn.textContent = '驗證中...';
   document.getElementById('loginErr').style.display = 'none';
   try {
-    const url  = GAS_URL + '?' + new URLSearchParams({ api: 'login', user, pass }).toString();
-    const res  = await fetch(url);
-    const data = await res.json();
-    if (data && data.ok) {
-      sessionStorage.setItem('momo_auth', '1');
+    const data = await postGas({ adminApi: 'login', params: { user, pass } });
+    if (data && data.ok && data.token) {
+      sessionStorage.setItem('momo_token', data.token);   // ★ 存 token
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('mainPage').style.display  = 'block';
       initClientList();
     } else {
-      document.getElementById('loginErr').textContent    = data.msg || '帳號或密碼錯誤';
+      document.getElementById('loginErr').textContent   = (data && data.msg) || '帳號或密碼錯誤';
       document.getElementById('loginErr').style.display = 'block';
       document.getElementById('loginPass').value = '';
     }
   } catch (e) {
-    document.getElementById('loginErr').textContent    = '連線失敗，請稍後再試';
+    document.getElementById('loginErr').textContent   = '連線失敗，請稍後再試';
     document.getElementById('loginErr').style.display = 'block';
   }
   btn.disabled = false; btn.textContent = '登入';
 }
 
+function doLogout() {
+  const token = sessionStorage.getItem('momo_token') || '';
+  if (token) { postGas({ adminApi: 'logout', params: { token } }).catch(function(){}); }
+  sessionStorage.removeItem('momo_token');
+  location.reload();
+}
+
+// 開頁自動登入：有 token 就直接進主畫面（若 token 已失效，第一次 API 會收到 401 自動踢回登入）
 (function() {
-  if (sessionStorage.getItem('momo_auth') === '1') {
+  if (sessionStorage.getItem('momo_token')) {
     document.getElementById('loginPage').style.display = 'none';
     document.getElementById('mainPage').style.display  = 'block';
     initClientList();
@@ -291,12 +312,22 @@ async function doLogin() {
 // ==========================================
 let curUid = '', curUser = {}, lastSearchResults = [];
 
+// 統一 API 呼叫：自動帶 token、走 POST body；遇 401 自動清票並踢回登入
 async function api(params) {
   setStatus('載入中...');
   try {
-    const url  = GAS_URL + '?' + new URLSearchParams(params).toString();
-    const res  = await fetch(url);
-    const data = await res.json();
+    const apiName = params.api;
+    const rest = Object.assign({}, params);
+    delete rest.api;
+    rest.token = sessionStorage.getItem('momo_token') || '';   // ★ 每次帶 token
+    const data = await postGas({ adminApi: apiName, params: rest });
+    if (data && data.code === 401) {                            // ★ 票無效/逾期
+      sessionStorage.removeItem('momo_token');
+      setStatus('登入已逾期');
+      showToast('登入已逾期，請重新登入', 'err');
+      setTimeout(() => location.reload(), 1200);
+      return null;
+    }
     setStatus('就緒');
     return data;
   } catch (e) {
